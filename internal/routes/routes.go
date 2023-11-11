@@ -65,5 +65,5 @@ func SetupServerAndRun() {
 	mux.HandleFunc("/todos", GetTodos).Methods("GET")
 	mux.HandleFunc("/todos/{id}", GetTodos).Methods("GET")
 
-	log.Fatal(http.ListenAndServeTLS(":8081", "cert.pub", "cert.sec", mux))
+	log.Fatal(http.ListenAndServe(":8081", mux))
 }

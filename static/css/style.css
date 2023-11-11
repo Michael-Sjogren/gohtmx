@@ -1,0 +1,15 @@
+
+.todo-list {
+    display: flex;
+    flex-flow: row;
+    gap: 1rem;
+    list-style: none;
+}
+
+.todo-item {
+    display: flex;
+    gap: 1rem;
+    padding-inline: 1em;
+    padding-block: 1em;
+    background-color: #f8f8f8;
+}

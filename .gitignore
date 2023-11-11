@@ -7,7 +7,7 @@
 *.dll
 *.so
 *.dylib
-
+./bin/gohtmx
 # Test binary, built with `go test -c`
 *.test
 *.db
@@ -19,3 +19,4 @@
 
 # Go workspace file
 go.work
+bin

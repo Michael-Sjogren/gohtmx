@@ -8,12 +8,10 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var (
-	db *sql.DB
-)
+var db *sql.DB
 
 func Setup() {
-	name := "mydb.db"
+	name := "db/mydb.db"
 	os.Remove(name)
 	var err error
 	db, err = sql.Open("sqlite3", name)
@@ -38,4 +36,9 @@ func Setup() {
 		tx.Exec("INSERT INTO Todo (description, is_done) VALUES (?,?)", "hello", i > 0)
 	}
 
+}
+
+func Close() {
+	err := db.Close()
+	log.Fatal(err)
 }

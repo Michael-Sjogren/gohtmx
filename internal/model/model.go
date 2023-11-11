@@ -1,6 +1,8 @@
 package model
 
-import "errors"
+import (
+	"errors"
+)
 
 type Todo = struct {
 	Id          int64
@@ -114,7 +116,7 @@ func DeleteTodo(id int64) error {
 	if err != nil {
 		return err
 	}
-	_, err = tx.Exec("DELETE FROM Todo WHERE id=(?);", id)
+	_, err = tx.Exec("DELETE FROM Todo WHERE id = ? ;", id)
 
 	if err != nil {
 		tx.Rollback()
@@ -128,7 +130,7 @@ func DeleteTodo(id int64) error {
 
 func GetTodo(id int64) (Todo, error) {
 
-	rows, err := db.Query("SELECT * FROM Todo WHERE id=(?);", id)
+	rows, err := db.Query("SELECT * FROM Todo WHERE id = ? ;", id)
 
 	if err != nil {
 		return Todo{}, err
