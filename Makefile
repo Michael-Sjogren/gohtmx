@@ -1,10 +1,12 @@
 build:
+	mkdir -p bin
 	@rm -rf main
-	@CGO_ENABLED=1 
-	@go build main.go
+
+	@CGO_ENABLED=1
+	@go build main.go -o ./bin/main
 
 run:build
-	./main
+	./bin/main
 
 watch:
 	find ./ -type f -iname "*.go" -o -iname "*.html" | entr make run
