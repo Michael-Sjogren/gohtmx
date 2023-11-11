@@ -3,8 +3,8 @@ package main
 import (
 	_ "embed"
 
-	"github.com/Michael-Sjogren/gohtmx/internal/model"
-	"github.com/Michael-Sjogren/gohtmx/internal/routes"
+	"gohtmx/internal/model"
+	"gohtmx/internal/routes"
 )
 
 func main() {

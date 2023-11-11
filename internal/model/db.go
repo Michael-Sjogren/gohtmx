@@ -11,7 +11,7 @@ import (
 var db *sql.DB
 
 func Setup() {
-	name := "db/mydb.db"
+	name := "mydb.db"
 	os.Remove(name)
 	var err error
 	db, err = sql.Open("sqlite3", name)
@@ -25,15 +25,6 @@ func Setup() {
 
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	tx, err := db.Begin()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer tx.Commit()
-	for i := 0; i < 25; i++ {
-		tx.Exec("INSERT INTO Todo (description, is_done) VALUES (?,?)", "hello", i > 0)
 	}
 
 }

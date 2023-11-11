@@ -1,3 +1,3 @@
-module github.com/Michael-Sjogren/gohtmx/internal
+module gohtmx/internal
 
 go 1.20
