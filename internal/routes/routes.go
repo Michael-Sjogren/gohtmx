@@ -2,10 +2,12 @@ package routes
 
 import (
 	"html/template"
-	"htmxmain/htmx/middleware"
-	"htmxmain/htmx/model"
 	"log"
 	"net/http"
+
+	"github.com/Michael-Sjogren/gohtmx/internal/model"
+
+	"github.com/Michael-Sjogren/gohtmx/internal/middleware"
 
 	"github.com/gorilla/mux"
 )
