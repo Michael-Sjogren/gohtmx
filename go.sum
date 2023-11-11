@@ -2,6 +2,8 @@ github.com/Michael-Sjogren/gohtmx/internal v0.0.0-20231111142559-cbc92740ebc4 h1
 github.com/Michael-Sjogren/gohtmx/internal v0.0.0-20231111142559-cbc92740ebc4/go.mod h1:se1r3z5NdVMUhhJkmCixdaUdxHClIu/Hc+ZYLq6uJ9w=
 github.com/Michael-Sjogren/gohtmx/internal v0.0.0-20231111142925-da88bf7d8436 h1:+QvvRxGaAwix16bzrcVuFZYBbPapOOBv8xYCxrD3QwA=
 github.com/Michael-Sjogren/gohtmx/internal v0.0.0-20231111142925-da88bf7d8436/go.mod h1:se1r3z5NdVMUhhJkmCixdaUdxHClIu/Hc+ZYLq6uJ9w=
+github.com/Michael-Sjogren/gohtmx/internal v0.0.0-20231111143156-6542e1e73ce1 h1:PKB0E0+65FlSAvYT3lJ5MvmxU8SAFyqYv+omZaAMCM8=
+github.com/Michael-Sjogren/gohtmx/internal v0.0.0-20231111143156-6542e1e73ce1/go.mod h1:se1r3z5NdVMUhhJkmCixdaUdxHClIu/Hc+ZYLq6uJ9w=
 github.com/gorilla/mux v1.8.1 h1:TuBL49tXwgrFYWhqrNgrUNEY92u81SPhu7sTdzQEiWY=
 github.com/gorilla/mux v1.8.1/go.mod h1:AKf9I4AEqPTmMytcMc0KkNouC66V3BtZ4qD5fmWSiMQ=
 github.com/mattn/go-sqlite3 v1.14.18 h1:JL0eqdCOq6DJVNPSvArO/bIV9/P7fbGrV00LZHc+5aI=
