@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"log"
 )
 
 type Todo = struct {
@@ -119,6 +120,7 @@ func DeleteTodo(id int64) error {
 	_, err = tx.Exec("DELETE FROM Todo WHERE id = ? ;", id)
 
 	if err != nil {
+		log.Println("Failed to remove todo")
 		tx.Rollback()
 		return err
 	}
