@@ -9,4 +9,4 @@ This is a simple todo web application testing out crud operations with htmx and 
 - go fiber , for api handling
 - go html templates
 - htmx , a js library
-
+- sqlite3
