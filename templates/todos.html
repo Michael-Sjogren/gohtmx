@@ -1,4 +1,18 @@
 {{ block "Todos" .}}
+
+<form hx-boost="true" action="/" method="post" hx-replace-url="true">
+    <legend>
+        <p>Add Task</p>
+    </legend>
+    <div class="grid">
+        <label for="description">Description</label>
+        <input id="description" type="text" name="description" maxlength="100" placeholder="Enter your description">
+    </div>
+    <div>
+        <button type="submit">Add</button>
+    </div>
+</form>
+
 <ul class="todo-list" id="todo-list">
     {{ range . }}
     <li hx-delete="/todos/{{.Id}}" hx-trigger="click">
@@ -12,3 +26,5 @@
     {{ end }}
 </ul>
 {{ end }}
+
+

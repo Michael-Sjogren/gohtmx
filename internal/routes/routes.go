@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 
-	middleware "github.com/Michael-Sjogren/gohtmx/internal/middleware"
 	model "github.com/Michael-Sjogren/gohtmx/internal/model"
 	"github.com/gorilla/mux"
 )
@@ -61,6 +60,30 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateTodo(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	todo, err := model.CreateTodo(r.Form.Get("description"), false)
+
+	log.Println("TODO:", todo)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	tmpl := template.Must(template.ParseFiles("templates/index.html"))
+
+	err = tmpl.Execute(w, nil)
+
+	if err != nil {
+		log.Println("template execution failed", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 }
 
@@ -81,9 +104,6 @@ func index(w http.ResponseWriter, r *http.Request) {
 
 func SetupServerAndRun() {
 	router = mux.NewRouter()
-	router.Use(
-		middleware.LoggingMiddleware,
-	)
 	router.HandleFunc("/", index)
 	router.HandleFunc("/todos/{id}", UpdateTodo).Methods("PUT")
 	router.HandleFunc("/todos/{id}", DeleteTodo).Methods("DELETE")
