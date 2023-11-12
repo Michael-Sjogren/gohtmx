@@ -1,6 +1,6 @@
 {{ block "Todos" .}}
 
-<form hx-boost="true" action="/" method="post" hx-replace-url="true">
+<form hx-boost="true" action="/todos" method="post" hx-replace-url="true">
     <legend>
         <p>Add Task</p>
     </legend>
@@ -15,7 +15,7 @@
 
 <ul class="todo-list" id="todo-list">
     {{ range . }}
-    <li hx-delete="/todos/{{.Id}}" hx-trigger="click">
+    <li hx-delete="/todos/{{.Id}}" hx-trigger="click" hx-target="#page-content">
         <span>{{.Description}}</span>
         {{ if ge .IsDone 1  }}
             <span>&#10003</span>

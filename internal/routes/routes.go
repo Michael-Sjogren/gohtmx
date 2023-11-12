@@ -7,109 +7,116 @@ import (
 	"strconv"
 
 	model "github.com/Michael-Sjogren/gohtmx/internal/model"
-	"github.com/gorilla/mux"
+	"github.com/gofiber/fiber/v2"
 )
 
-var router *mux.Router
-
-func GetTodos(w http.ResponseWriter, r *http.Request) {
+func GetTodos(ctx *fiber.Ctx) error {
 	todos, err := model.GetAllTodos(50)
 	if err != nil {
 		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		ctx.Status(fiber.StatusBadRequest)
+		return nil
 	}
 	tmpl := template.Must(template.ParseFiles("templates/todos.html"))
 
-	err = tmpl.ExecuteTemplate(w, "Todos", todos)
+	err = tmpl.ExecuteTemplate(ctx.Response().BodyWriter(), "Todos", todos)
 
 	if err != nil {
 		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		ctx.Status(fiber.StatusInternalServerError)
 	}
+
+	return nil
 
 }
 
-func DeleteTodo(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(mux.Vars(r)["id"], 10, 64)
+func HandleDeleteTodo(ctx *fiber.Ctx) error {
+	id, err := strconv.ParseInt(ctx.Params("id", "-1"), 10, 64)
 
-	if err != nil {
+	if err != nil || id == -1 {
 		log.Println("Failed parse item id", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		ctx.Status(fiber.StatusBadRequest)
+		return nil
 	}
 
 	err = model.DeleteTodo(id)
 
 	if err != nil {
 		log.Println("Failed to delete item", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		ctx.Status(fiber.StatusBadRequest)
 	}
 
 	todos, err := model.GetAllTodos(-1)
-
 	tmpl := template.Must(template.ParseFiles("templates/todos.html"))
 
-	err = tmpl.Execute(w, todos)
+	err = tmpl.Execute(ctx.Response().BodyWriter(), todos)
 
 	if err != nil {
 		log.Println("template execution failed", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		ctx.Status(fiber.StatusInternalServerError)
+
+		return nil
 	}
+
+	return nil
+
 }
 
-func CreateTodo(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+func CreateTodo(ctx *fiber.Ctx) error {
+	description := ctx.FormValue("description", "")
 
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	todo, err := model.CreateTodo(r.Form.Get("description"), false)
+	todo, err := model.CreateTodo(description, false)
 
 	log.Println("TODO:", todo)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		ctx.Status(fiber.StatusBadRequest)
+		return nil
 	}
 
 	tmpl := template.Must(template.ParseFiles("templates/index.html"))
 
-	err = tmpl.Execute(w, nil)
+	err = tmpl.Execute(ctx.Response().BodyWriter(), nil)
 
 	if err != nil {
 		log.Println("template execution failed", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		ctx.Status(fiber.StatusInternalServerError)
+		return nil
 	}
+	return nil
 
 }
 
-func UpdateTodo(w http.ResponseWriter, r *http.Request) {
-
+func UpdateTodo(ctx *fiber.Ctx) error {
+	return nil
 }
 
-func index(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("templates/index.html"))
+func index(ctx *fiber.Ctx) error {
 
-	err := tmpl.Execute(w, nil)
+	err := ctx.Render("templates/index.html", nil)
 
 	if err != nil {
 		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		ctx.Status(http.StatusBadRequest)
+		return nil
 	}
+
+	return nil
+
 }
 
 func SetupServerAndRun() {
-	router = mux.NewRouter()
-	router.HandleFunc("/", index)
-	router.HandleFunc("/todos/{id}", UpdateTodo).Methods("PUT")
-	router.HandleFunc("/todos/{id}", DeleteTodo).Methods("DELETE")
-	router.HandleFunc("/todos", CreateTodo).Methods("POST")
-	router.HandleFunc("/todos", GetTodos).Methods("GET")
-	router.HandleFunc("/todos/{id}", GetTodos).Methods("GET")
+	app := fiber.New(
+		fiber.Config{
+			// Views Layout is the global layout for all template render until override on Render function.
+			ViewsLayout: "templates/index.html",
+		},
+	)
+	app.Get("/", index)
+	app.Put("/todos/:id", UpdateTodo)
+	app.Delete("/todos/:id", HandleDeleteTodo)
+	app.Post("/todos", CreateTodo)
+	app.Get("/todos", GetTodos)
+	app.Get("/todos/:id", GetTodos)
 
-	log.Fatal(http.ListenAndServe(":8081", router))
+	app.Listen(":8081")
 }
