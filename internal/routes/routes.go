@@ -1,4 +1,4 @@
-package main
+package routes
 
 import (
 	"html/template"
@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Michael-Sjogren/gohtmx/internal/middleware"
-	"github.com/Michael-Sjogren/gohtmx/internal/model"
+	middleware "github.com/Michael-Sjogren/gohtmx/internal/middleware"
+	model "github.com/Michael-Sjogren/gohtmx/internal/model"
 	"github.com/gorilla/mux"
 )
 
