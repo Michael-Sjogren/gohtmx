@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	model "github.com/Michael-Sjogren/gohtmx/internal/model"
-	"github.com/gofiber/fiber/v2"
+	fiber "github.com/gofiber/fiber/v2"
 )
 
 func GetTodos(ctx *fiber.Ctx) error {
@@ -87,6 +87,33 @@ func CreateTodo(ctx *fiber.Ctx) error {
 }
 
 func UpdateTodo(ctx *fiber.Ctx) error {
+	id, err := strconv.ParseInt(ctx.Params("id", "-1"), 10, 64)
+	if err != nil {
+		ctx.Status(fiber.StatusBadRequest)
+		return err
+	}
+	description := ctx.FormValue("description", "")
+	if len(description) == 0 {
+		ctx.Status(fiber.StatusBadRequest)
+		return nil
+	}
+
+	err = model.UpdateTodo(id, description, false)
+	if err != nil {
+		ctx.Status(fiber.StatusBadRequest)
+		return err
+	}
+	err = ctx.Render("templates/todo-item.html", model.Todo{
+		Id:          id,
+		Description: description,
+		IsDone:      0,
+	})
+
+	if err != nil {
+		ctx.Status(fiber.StatusBadRequest)
+		return err
+	}
+
 	return nil
 }
 
@@ -111,6 +138,10 @@ func SetupServerAndRun() {
 			ViewsLayout: "templates/index.html",
 		},
 	)
+
+	app.Static("/", "./static/", fiber.Static{
+		Compress: true,
+	})
 	app.Get("/", index)
 	app.Put("/todos/:id", UpdateTodo)
 	app.Delete("/todos/:id", HandleDeleteTodo)
