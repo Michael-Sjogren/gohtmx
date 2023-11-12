@@ -1,4 +1,4 @@
-package routes
+package main
 
 import (
 	"html/template"
@@ -6,10 +6,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Michael-Sjogren/gohtmx/internal/middleware"
 	"github.com/Michael-Sjogren/gohtmx/internal/model"
 	"github.com/gorilla/mux"
-
-	"github.com/Michael-Sjogren/gohtmx/internal/middleware"
 )
 
 var router *mux.Router
