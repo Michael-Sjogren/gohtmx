@@ -1,19 +1,19 @@
 package routes
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
 
+	"github.com/Michael-Sjogren/gohtmx/internal/middleware"
 	model "github.com/Michael-Sjogren/gohtmx/internal/model"
 	"github.com/gorilla/mux"
 )
 
-var router *mux.Router
-
-func GetTodos(w http.ResponseWriter, r *http.Request) {
-	todos, err := model.GetAllTodos(50)
+func HandleGetTodos(w http.ResponseWriter, r *http.Request) {
+	todos, err := model.GetAllTodos(-1)
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -30,7 +30,7 @@ func GetTodos(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func DeleteTodo(w http.ResponseWriter, r *http.Request) {
+func HandleDeleteTodo(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(mux.Vars(r)["id"], 10, 64)
 
 	if err != nil {
@@ -59,10 +59,12 @@ func DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CreateTodo(w http.ResponseWriter, r *http.Request) {
+func HandleCreateTodo(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
-
+	fmt.Println("Create todo")
 	if err != nil {
+		fmt.Println("Bad request")
+
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -87,7 +89,7 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func UpdateTodo(w http.ResponseWriter, r *http.Request) {
+func HandleUpdateTodo(w http.ResponseWriter, r *http.Request) {
 
 }
 
@@ -103,13 +105,14 @@ func index(w http.ResponseWriter, r *http.Request) {
 }
 
 func SetupServerAndRun() {
-	router = mux.NewRouter()
-	router.HandleFunc("/", index)
-	router.HandleFunc("/todos/{id}", UpdateTodo).Methods("PUT")
-	router.HandleFunc("/todos/{id}", DeleteTodo).Methods("DELETE")
-	router.HandleFunc("/todos", CreateTodo).Methods("POST")
-	router.HandleFunc("/todos", GetTodos).Methods("GET")
-	router.HandleFunc("/todos/{id}", GetTodos).Methods("GET")
+	router := mux.NewRouter()
 
+	router.HandleFunc("/", index)
+	router.HandleFunc("/todos/{id}", HandleUpdateTodo).Methods("PUT")
+	router.HandleFunc("/todos/{id}", HandleDeleteTodo).Methods("DELETE")
+	router.HandleFunc("/todos", HandleCreateTodo).Methods("POST")
+	router.HandleFunc("/todos", HandleGetTodos).Methods("GET")
+
+	router.Use(middleware.LoggingMiddleware)
 	log.Fatal(http.ListenAndServe(":8081", router))
 }
