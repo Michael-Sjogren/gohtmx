@@ -1,6 +1,6 @@
 {{ block "Todos" .}}
-
-<form hx-boost="true" action="/" method="post" hx-replace-url="true">
+<!-- Add todo -->
+<form hx-boost="true" action="/todos" method="post" hx-replace-url="true">
     <legend>
         <p>Add Task</p>
     </legend>
@@ -15,16 +15,21 @@
 
 <ul class="todo-list" id="todo-list">
     {{ range . }}
-    <li hx-delete="/todos/{{.Id}}" hx-trigger="click">
-        <span>{{.Description}}</span>
-        {{ if ge .IsDone 1  }}
+    <li class="flex">
+        <form hx-boost="true" action="/todos/{{.Id}}" method="put" hx-target="#edit-description">
+            <input id="edit-description" name="description" placeholder="edit description" type="text"
+                value="{{.Description}}" maxlength="100" />
+                <button type="submit"> Save &#9998;</button>
+        </form>
+
+        <div hx-delete="/todos/{{.Id}}" hx-trigger="click" hx-target="#page-content">
+            {{ if ge .IsDone 1 }}
             <span>&#10003</span>
-        {{ else }}
+            {{ else }}
             <span>&#x2717</span>
-        {{ end }}
+            {{ end }}
+        </div>
     </li>
     {{ end }}
 </ul>
 {{ end }}
-
-

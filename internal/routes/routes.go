@@ -1,118 +1,153 @@
 package routes
 
 import (
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
 	"strconv"
 
-	"github.com/Michael-Sjogren/gohtmx/internal/middleware"
 	model "github.com/Michael-Sjogren/gohtmx/internal/model"
-	"github.com/gorilla/mux"
+	fiber "github.com/gofiber/fiber/v2"
 )
 
-func HandleGetTodos(w http.ResponseWriter, r *http.Request) {
+func HandleGetTodos(ctx *fiber.Ctx) error {
 	todos, err := model.GetAllTodos(-1)
 	if err != nil {
 		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		ctx.Status(fiber.StatusBadRequest)
+		return nil
 	}
 	tmpl := template.Must(template.ParseFiles("templates/todos.html"))
 
-	err = tmpl.ExecuteTemplate(w, "Todos", todos)
+	err = tmpl.ExecuteTemplate(ctx.Response().BodyWriter(), "Todos", todos)
 
 	if err != nil {
 		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		ctx.Status(fiber.StatusInternalServerError)
 	}
+
+	return nil
 
 }
 
-func HandleDeleteTodo(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(mux.Vars(r)["id"], 10, 64)
+func HandleDeleteTodo(ctx *fiber.Ctx) error {
+	id, err := strconv.ParseInt(ctx.Params("id", "-1"), 10, 64)
 
-	if err != nil {
+	if err != nil || id == -1 {
 		log.Println("Failed parse item id", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		ctx.Status(fiber.StatusBadRequest)
+		return nil
 	}
 
 	err = model.DeleteTodo(id)
 
 	if err != nil {
 		log.Println("Failed to delete item", err)
-		w.WriteHeader(http.StatusInternalServerError)
+		ctx.Status(fiber.StatusBadRequest)
 	}
 
 	todos, err := model.GetAllTodos(-1)
-
 	tmpl := template.Must(template.ParseFiles("templates/todos.html"))
 
-	err = tmpl.Execute(w, todos)
+	err = tmpl.Execute(ctx.Response().BodyWriter(), todos)
 
 	if err != nil {
 		log.Println("template execution failed", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		ctx.Status(fiber.StatusInternalServerError)
+
+		return nil
 	}
+
+	return nil
+
 }
 
-func HandleCreateTodo(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-	fmt.Println("Create todo")
-	if err != nil {
-		fmt.Println("Bad request")
+func CreateTodo(ctx *fiber.Ctx) error {
+	description := ctx.FormValue("description", "")
 
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	todo, err := model.CreateTodo(r.Form.Get("description"), false)
+	todo, err := model.CreateTodo(description, false)
 
 	log.Println("TODO:", todo)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		ctx.Status(fiber.StatusBadRequest)
+		return nil
 	}
 
 	tmpl := template.Must(template.ParseFiles("templates/index.html"))
 
-	err = tmpl.Execute(w, nil)
+	err = tmpl.Execute(ctx.Response().BodyWriter(), nil)
 
 	if err != nil {
 		log.Println("template execution failed", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		ctx.Status(fiber.StatusInternalServerError)
+		return nil
+	}
+	return nil
+
+}
+
+func UpdateTodo(ctx *fiber.Ctx) error {
+	id, err := strconv.ParseInt(ctx.Params("id", "-1"), 10, 64)
+	if err != nil {
+		ctx.Status(fiber.StatusBadRequest)
+		return err
+	}
+	description := ctx.FormValue("description", "")
+	if len(description) == 0 {
+		ctx.Status(fiber.StatusBadRequest)
+		return nil
 	}
 
+	err = model.UpdateTodo(id, description, false)
+	if err != nil {
+		ctx.Status(fiber.StatusBadRequest)
+		return err
+	}
+	err = ctx.Render("templates/todo-item.html", model.Todo{
+		Id:          id,
+		Description: description,
+		IsDone:      0,
+	})
+
+	if err != nil {
+		ctx.Status(fiber.StatusBadRequest)
+		return err
+	}
+
+	return nil
 }
 
-func HandleUpdateTodo(w http.ResponseWriter, r *http.Request) {
+func index(ctx *fiber.Ctx) error {
 
-}
-
-func index(w http.ResponseWriter, r *http.Request) {
-	tmpl := template.Must(template.ParseFiles("templates/index.html"))
-
-	err := tmpl.Execute(w, nil)
+	err := ctx.Render("templates/index.html", nil)
 
 	if err != nil {
 		log.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
+		ctx.Status(http.StatusBadRequest)
+		return nil
 	}
+
+	return nil
+
 }
 
 func SetupServerAndRun() {
-	router := mux.NewRouter()
+	app := fiber.New(
+		fiber.Config{
+			// Views Layout is the global layout for all template render until override on Render function.
+			ViewsLayout: "templates/index.html",
+		},
+	)
 
-	router.HandleFunc("/", index)
-	router.HandleFunc("/todos/{id}", HandleUpdateTodo).Methods("PUT")
-	router.HandleFunc("/todos/{id}", HandleDeleteTodo).Methods("DELETE")
-	router.HandleFunc("/todos", HandleCreateTodo).Methods("POST")
-	router.HandleFunc("/todos", HandleGetTodos).Methods("GET")
+	app.Static("/", "./static/", fiber.Static{
+		Compress: true,
+	})
+	app.Get("/", index)
+	app.Put("/todos/:id", UpdateTodo)
+	app.Delete("/todos/:id", HandleDeleteTodo)
+	app.Post("/todos", CreateTodo)
+	app.Get("/todos", HandleGetTodos)
+	app.Get("/todos/:id", HandleGetTodos)
 
-	router.Use(middleware.LoggingMiddleware)
-	log.Fatal(http.ListenAndServe(":8081", router))
+	app.Listen(":8081")
 }

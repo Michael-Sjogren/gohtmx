@@ -13,3 +13,9 @@
     padding-block: 1em;
     background-color: #f8f8f8;
 }
+
+
+.flex {
+    display: flex;
+    gap: 1rem;
+}

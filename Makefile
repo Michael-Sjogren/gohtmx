@@ -6,10 +6,11 @@ PROGRAM_PATH=$(BUILD_LOC)/$(PROGRAM_NAME)
 build:
 	@rm -rf $(BUILD_LOC)
 	mkdir -p $(BUILD_LOC)
+	@echo "Copying files...\n"
 	cp -r static $(BUILD_LOC)
 	cp -r templates $(BUILD_LOC)
-
-	@CGO_ENABLED=1 go build -o $(PROGRAM_PATH) $(MAIN_FILE)
+	@echo "Building...\n"
+	CGO_ENABLED=1 go build -o $(PROGRAM_PATH) $(MAIN_FILE)
 
 run:build
 	$(PROGRAM_PATH)
